@@ -1,0 +1,17 @@
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\bin\Debug\SchoolAccounting.exe.config
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\bin\Debug\SchoolAccounting.exe
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\bin\Debug\SchoolAccounting.pdb
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\bin\Debug\EntityFramework.dll
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\bin\Debug\EntityFramework.xml
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\obj\Debug\SchoolAccounting.csprojAssemblyReference.cache
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\obj\Debug\SchoolAccounting.Properties.Resources.resources
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\obj\Debug\SchoolAccounting.csproj.GenerateResource.cache
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\obj\Debug\SchoolAccounting.csproj.CoreCompileInputs.cache
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\obj\Debug\SchoolAccounting.csproj.CopyComplete
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\obj\Debug\SchoolAccounting.exe
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\obj\Debug\SchoolAccounting.pdb
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\obj\Debug\SchoolAccounting.Main.resources
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\obj\Debug\SchoolAccounting.Forms.AboutProgram.resources
+C:\Users\thedr\source\repos\SchoolAccounting\SchoolAccounting\obj\Debug\SchoolAccounting.Forms.OperationForm.resources
