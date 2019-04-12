@@ -45,9 +45,22 @@ namespace SchoolAccounting
             comboBoxTypeClient.DataSource = typeClients;
             comboBoxTypeClient.DisplayMember = "Name";
             comboBoxTypeClient.ValueMember = "Name";
+
+            var typeServices = Enum.GetValues(typeof(TypeOfService))
+                .Cast<TypeOfService>()
+                .Select(p => new { Name = Enum.GetName(typeof(TypeOfService), p), Value = (int)p })
+                .ToList();
+
+            typeServices.Insert(0, new { Name = "Все", Value = 0 });
+
+            comboBoxServiceType.DataSource = typeServices;
+            comboBoxServiceType.DisplayMember = "Name";
+            comboBoxServiceType.ValueMember = "Name";
+
+            comboBoxServiceAccess.Text = "Все";
         }
 
-        private void LoadDataGridViewAccounting(List<Accounting> accountingsList = null)
+        private void LoadDataGridViewAccounting(IReadOnlyCollection<Accounting> accountingsList = null)
         {
             dataGridViewAccounting.Rows.Clear();
             dataGridViewAccounting.Columns.Clear();
@@ -101,11 +114,11 @@ namespace SchoolAccounting
             dataGridViewAccounting.Columns[5].HeaderText = "Дата";
         }
 
-        private void LoadDataGridViewService()
+        private void LoadDataGridViewService(IReadOnlyCollection<Service> servicesList = null)
         {
             using (var db = new ModelsContext())
             {
-                dataGridViewService.DataSource = db.Services.ToList();
+                dataGridViewService.DataSource = servicesList ?? db.Services.ToList();
             }
 
             using (var db = new ModelsContext())
@@ -644,8 +657,19 @@ namespace SchoolAccounting
 
         private void CorrectionFilterPrice(TextBox textBox)
         {
+            if (string.IsNullOrEmpty(textBox.Text))
+            {
+                return;
+            }
+
             if (textBox.Text.Contains(','))
             {
+                if (textBox.Text[0] == ',')
+                {
+                    textBox.Text.Insert(0, "0");
+                }
+
+
                 for (var i = 0; i < 2; i++)
                 {
                     if (textBox.Text.Length - 1 != textBox.Text.IndexOf(',') + 2)
@@ -677,6 +701,97 @@ namespace SchoolAccounting
             {
                 MessageBox.Show("Файл-помощник отсутсвует.");
             }
+        }
+
+        private void textBoxServicePriceFrom_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            ValidPriceData(textBoxServicePriceFrom, e);
+        }
+
+        private void textBoxServicePriceTo_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            ValidPriceData(textBoxServicePriceTo, e);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            textBoxName.Text = string.Empty;
+            textBoxServiceDescription.Text = string.Empty;
+            textBoxServicePriceFrom.Text = string.Empty;
+            textBoxServicePriceTo.Text = string.Empty;
+            comboBoxServiceAccess.Text = "Все";
+            comboBoxServiceType.Text = "Все";
+
+            LoadDataGridViewService();
+        }
+
+        private void comboBoxTypeClient_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.KeyChar = (char)Keys.None;
+        }
+
+        private void buttonServiceFilterApply_Click(object sender, EventArgs e)
+        {
+            List<Service> accountingsList = null;
+
+            if (!string.IsNullOrEmpty(textBoxServicePriceFrom.Text) && !string.IsNullOrEmpty(textBoxServicePriceTo.Text) && double.Parse(textBoxServicePriceFrom.Text) > double.Parse(textBoxServicePriceTo.Text))
+            {
+                MessageBox.Show("Начальная сумма должна быть меньше конечной.");
+                return;
+            }
+
+            using (var db = new ModelsContext())
+            {
+                IQueryable<Service> dbAccountings = db.Services;
+
+                CorrectionFilterPrice(textBoxServicePriceFrom);
+                CorrectionFilterPrice(textBoxServicePriceTo);
+
+                if (!string.IsNullOrEmpty(textBoxName.Text))
+                {
+                    dbAccountings = dbAccountings.Where(x => x.Name.Contains(textBoxName.Text));
+                }
+
+                if (!comboBoxServiceType.Text.Contains("Все"))
+                {
+                    var valueTypeClientFilter = (TypeOfService)Enum.Parse(typeof(TypeOfService),
+                        comboBoxServiceType.Text);
+                    dbAccountings = dbAccountings.Where(x => x.TypeOfService == valueTypeClientFilter);
+                }
+
+                if (!comboBoxServiceAccess.Text.Contains("Все"))
+                {
+                    var valueServiceNameFilter = comboBoxServiceAccess.Text;
+                    dbAccountings = dbAccountings.Where(x => x.Access.Contains(valueServiceNameFilter));
+                }
+
+                if (!string.IsNullOrEmpty(textBoxServicePriceFrom.Text))
+                {
+                    var priceFrom = double.Parse(textBoxServicePriceFrom.Text);
+                    dbAccountings = dbAccountings.Where(x => x.Price >= priceFrom);
+                }
+
+                if (!string.IsNullOrEmpty(textBoxServicePriceTo.Text))
+                {
+                    var priceTo = double.Parse(textBoxServicePriceTo.Text);
+                    dbAccountings = dbAccountings.Where(x => x.Price <= priceTo);
+                }
+
+                if (!string.IsNullOrEmpty(textBoxServiceDescription.Text))
+                {
+                    dbAccountings = dbAccountings.Where(x => x.Description.Contains(textBoxServiceDescription.Text));
+                }
+
+                accountingsList = dbAccountings.ToList();
+            }
+
+            if (accountingsList.ToList().Count == 0)
+            {
+                MessageBox.Show("Результаты не надены.");
+                return;
+            }
+
+            LoadDataGridViewService(accountingsList);
         }
     }
 }
