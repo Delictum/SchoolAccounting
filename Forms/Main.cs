@@ -15,7 +15,7 @@ namespace SchoolAccounting
 {
     public partial class Main : Form
     {
-        private const int AmountOfColumns = 6;
+        private const int AmountOfColumns = 7;
         public string Buffer;
         private bool _dataGridViewAccountingSort = true;
         private bool _dataGridViewServiceSort = true;
@@ -80,18 +80,45 @@ namespace SchoolAccounting
 
                     foreach (var accounting in db.Accountings)
                     {
+                        Payment payment;
+                        using (var _db = new ModelsContext())
+                        {
+                            payment = _db.Payments.First(x => x.Id == accounting.PaymentId);
+                        }
+                        
+                        var paid = payment.Paid ? "Оплачено" : "Без оплаты";
+                        double amountCost = 0;
+
+                        using (var _db = new ModelsContext())
+                        {
+                            var list = _db.Attachments.Where(x => x.PaymentId == accounting.PaymentId).ToList();
+
+                            foreach (var attachment in list)
+                            {
+                                amountCost += attachment.MadeBy;
+                            }
+                        }
+
+                        if (amountCost > 0 && amountCost < accounting.Service.Price)
+                        {
+                            paid = "Частичная";
+                        }
+
                         dataGridViewAccounting.Rows.Add(accounting.Id, accounting.Client.FullName,
                             accounting.Client.TypeClient, accounting.Service.Name, accounting.Service.Price,
-                            accounting.Date.ToShortDateString());
+                            accounting.Date.ToShortDateString(), paid);
                     }
                 }
                 else
                 {
                     foreach (var accounting in accountingsList)
                     {
+                        var payment = db.Payments.First(x => x.Id == accounting.PaymentId);
+                        var paid = payment.Paid ? "Оплачено" : "Без оплаты";
+
                         dataGridViewAccounting.Rows.Add(accounting.Id, accounting.Client.FullName,
                             accounting.Client.TypeClient, accounting.Service.Name, accounting.Service.Price,
-                            accounting.Date.ToShortDateString());
+                            accounting.Date.ToShortDateString(), paid);
                     }
                 }
             }
@@ -112,6 +139,9 @@ namespace SchoolAccounting
 
             dataGridViewAccounting.Columns[5].Width = 120;
             dataGridViewAccounting.Columns[5].HeaderText = "Дата";
+
+            dataGridViewAccounting.Columns[5].Width = 120;
+            dataGridViewAccounting.Columns[5].HeaderText = "Статус оплаты";
         }
 
         private void LoadDataGridViewService(IReadOnlyCollection<Service> servicesList = null)
@@ -437,6 +467,11 @@ namespace SchoolAccounting
                     {
                         try
                         {
+                            var currentId =
+                                Convert.ToInt32(dataGridViewAccounting.CurrentRow.Cells[0].Value.ToString());
+
+                            var current = db.Accountings.First(x => currentId == x.Id);
+
                             var currentFullName = dataGridViewAccounting.CurrentRow.Cells[1].Value.ToString();
                             var currentTypeClient = (TypeClient)Enum.Parse(typeof(TypeClient),
                                 dataGridViewAccounting.CurrentRow.Cells[2].Value.ToString());
@@ -450,14 +485,17 @@ namespace SchoolAccounting
                             var accountingService = db.Services.First(x =>
                                 x.Name == currentServiceName && x.Price == currentServicePrice);
 
+                            var payment = db.Payments.First(x => x.Id == current.PaymentId);
+
                             classObject = new Accounting
                             {
-                                Id = Convert.ToInt32(dataGridViewAccounting.CurrentRow.Cells[0].Value.ToString()),
+                                Id = currentId,
                                 Client = accountingClient,
                                 ClientId = accountingClient.Id,
                                 Date = DateTime.Parse(dataGridViewAccounting.CurrentRow.Cells[5].Value.ToString()),
                                 Service = accountingService,
-                                ServiceId = accountingService.Id
+                                ServiceId = accountingService.Id,
+                                PaymentId = payment.Id
                             };
                         }
                         catch (NullReferenceException)
@@ -542,14 +580,16 @@ namespace SchoolAccounting
         {
             List<Accounting> accountingsList = null;
 
-            if (dateTimePickerDateFrom.Value > dateTimePickerDateTo.Value)
-            {
-                MessageBox.Show("Начальная дата должна быть меньше конечной.");
-                return;
-            }
-            if (double.Parse(textBoxPriceFrom.Text) > double.Parse(textBoxPriceTo.Text))
+            if (!string.IsNullOrEmpty(textBoxServicePriceFrom.Text) && !string.IsNullOrEmpty(textBoxServicePriceTo.Text) && double.Parse(textBoxServicePriceFrom.Text) > double.Parse(textBoxServicePriceTo.Text))
             {
                 MessageBox.Show("Начальная сумма должна быть меньше конечной.");
+                return;
+            }
+
+            dateTimePickerDateFrom.Value = new DateTime(dateTimePickerDateFrom.Value.Year, dateTimePickerDateFrom.Value.Month, dateTimePickerDateFrom.Value.Day);
+            if (checkBoxFilterDate.Checked && dateTimePickerDateFrom.Value > dateTimePickerDateTo.Value)
+            {
+                MessageBox.Show("Начальная дата должна быть меньше конечной.");
                 return;
             }
 
@@ -658,6 +698,11 @@ namespace SchoolAccounting
         private void CorrectionFilterPrice(TextBox textBox)
         {
             if (string.IsNullOrEmpty(textBox.Text))
+            {
+                return;
+            }
+
+            if (textBox.Text.Length == 0)
             {
                 return;
             }

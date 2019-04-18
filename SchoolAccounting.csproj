@@ -92,9 +92,32 @@
     <Compile Include="Forms\OperationForm.Designer.cs">
       <DependentUpon>OperationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201904070934496_InitialCreate.cs" />
+    <Compile Include="Migrations\201904070934496_InitialCreate.Designer.cs">
+      <DependentUpon>201904070934496_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904161613311_CreatePayment.cs" />
+    <Compile Include="Migrations\201904161613311_CreatePayment.Designer.cs">
+      <DependentUpon>201904161613311_CreatePayment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904161616041_ChangePaymentAddComment.cs" />
+    <Compile Include="Migrations\201904161616041_ChangePaymentAddComment.Designer.cs">
+      <DependentUpon>201904161616041_ChangePaymentAddComment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904181259194_CreateAttachments.cs" />
+    <Compile Include="Migrations\201904181259194_CreateAttachments.Designer.cs">
+      <DependentUpon>201904181259194_CreateAttachments.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201904181303178_ChangeAttachment.cs" />
+    <Compile Include="Migrations\201904181303178_ChangeAttachment.Designer.cs">
+      <DependentUpon>201904181303178_ChangeAttachment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="ModelsContext.cs" />
     <Compile Include="Models\Accounting.cs" />
+    <Compile Include="Models\Attachment.cs" />
     <Compile Include="Models\Client.cs" />
+    <Compile Include="Models\Payment.cs" />
     <Compile Include="Models\Service.cs" />
     <Compile Include="Models\TypeClient.cs" />
     <Compile Include="Models\TypeOfService.cs" />
@@ -109,6 +132,21 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\OperationForm.resx">
       <DependentUpon>OperationForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904070934496_InitialCreate.resx">
+      <DependentUpon>201904070934496_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904161613311_CreatePayment.resx">
+      <DependentUpon>201904161613311_CreatePayment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904161616041_ChangePaymentAddComment.resx">
+      <DependentUpon>201904161616041_ChangePaymentAddComment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904181259194_CreateAttachments.resx">
+      <DependentUpon>201904181259194_CreateAttachments.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904181303178_ChangeAttachment.resx">
+      <DependentUpon>201904181303178_ChangeAttachment.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -12,7 +16,9 @@ namespace SchoolAccounting.Forms
     {
         private Service _service;
         private Accounting _accounting;
-        private TypeOfTransaction _typeOfTransaction;
+        private readonly TypeOfTransaction _typeOfTransaction;
+        private byte[] _fileData;
+        private string _fileName = null;
 
         public OperationForm(int selectedTabControl, TypeOfTransaction typeOfTransaction, object classObject = null)
         {
@@ -25,6 +31,10 @@ namespace SchoolAccounting.Forms
             {
                 case 0:
                     groupBoxAccounting.Visible = true;
+                    if (_typeOfTransaction == TypeOfTransaction.Редактирование)
+                    {
+                        groupBoxAttacments.Enabled = true;
+                    }
                     LoadFieldsAccounting(classObject);
                     break;
                 case 1:
@@ -34,12 +44,67 @@ namespace SchoolAccounting.Forms
             }
         }
 
+        private void LoadAttachments(Accounting accounting)
+        {
+            dataGridViewAttachments.Rows.Clear();
+            dataGridViewAttachments.Columns.Clear();
+
+            for (var x = 0; x < 4; x++)
+            {
+                var column = new DataGridViewTextBoxColumn();
+                dataGridViewAttachments.Columns.Add(column);
+            }
+
+            double amountCost = 0;
+            if (accounting != null)
+            {
+                using (var db = new ModelsContext())
+                {
+                    var list = db.Attachments.Where(x => x.PaymentId == accounting.PaymentId).ToList();
+
+                    foreach (var attachment in list)
+                    {
+                        dataGridViewAttachments.Rows.Add(attachment.Id, attachment.MadeBy,
+                            attachment.FileName, (attachment.File != null ? "+" : string.Empty));
+                        amountCost += attachment.MadeBy;
+                    }
+                }
+            }
+
+            if (accounting != null && amountCost > accounting.Service.Price)
+            {
+                labelWarningErrorMessage.Text = "Возможно допущена ошибка в подсчетах.";
+                labelWarningAmountCost.Text = string.Join(string.Empty, "Стоимость услуги ", accounting.Service.Price, "р., внесено ", amountCost, "р.");
+            }
+
+            if (accounting != null && amountCost >= accounting.Service.Price)
+            {
+                using (var db = new ModelsContext())
+                {
+                    var payment = db.Payments.First(x => x.Id == accounting.PaymentId);
+                    payment.Paid = true;
+                    db.SaveChanges();
+                }
+            }
+
+            dataGridViewAttachments.Columns[0].Visible = false;
+
+            dataGridViewAttachments.Columns[1].Width = 120;
+            dataGridViewAttachments.Columns[1].HeaderText = "Внесено";
+
+            dataGridViewAttachments.Columns[2].Width = 200;
+            dataGridViewAttachments.Columns[2].HeaderText = "Файл";
+
+            dataGridViewAttachments.Columns[3].Width = 70;
+            dataGridViewAttachments.Columns[3].HeaderText = "Скачать";
+        }
+
         private void LoadFieldsAccounting(object classObject)
         {
-            groupBoxService.Location = new Point(500, 500);
+            groupBoxService.Location = new Point(1000, 500);
             groupBoxAccounting.Location = new Point(12, 12);
-            Width = 465;
-            Height = 275;
+            Width = 920;
+            Height = 375;
 
             comboBoxTypeClient.DataSource = Enum.GetValues(typeof(TypeClient))
                 .Cast<TypeClient>()
@@ -67,6 +132,7 @@ namespace SchoolAccounting.Forms
 
             buttonAccountingCommit.Text = "Создать";
 
+            LoadAttachments(null);
             if (classObject == null)
             {
                 return;
@@ -75,17 +141,36 @@ namespace SchoolAccounting.Forms
             buttonAccountingCommit.Text = "Изменить";
 
             _accounting = (Accounting)classObject;
+            LoadAttachments(_accounting);
             comboBoxService.Text = _accounting.Service.Name;
             comboBoxClient.Text = _accounting.Client.FullName;
             textBoxClientFullName.Text = _accounting.Client.FullName;
             comboBoxTypeClient.Text = _accounting.Client.TypeClient.ToString();
             dateTimePickerAccounting.Value = _accounting.Date;
+
+            using (var db = new ModelsContext())
+            {
+                var payment = db.Payments.First(x => x.Id == _accounting.PaymentId);
+                textBoxComment.Text = payment.Comment ?? string.Empty;
+                checkBoxPaid.Checked = payment.Paid;
+
+                //if (payment.File == null)
+                //{
+                //    return;
+                //}
+
+                //var mStream = new MemoryStream();
+                //mStream.Write(payment.File, 0, Convert.ToInt32(payment.File.Length));
+                //var bm = new Bitmap(mStream, false);
+                //pictureBoxFile.Image = bm;
+                //mStream.Dispose();
+            }
         }
 
         private void LoadFieldsService(object classObject)
         {
             Width = 525;
-            Height = 365;
+            Height = 400;
 
             comboBoxTypeOfService.DataSource = Enum.GetValues(typeof(TypeOfService))
                 .Cast<TypeOfService>()
@@ -157,7 +242,9 @@ namespace SchoolAccounting.Forms
             }
 
             if (e.KeyChar != 8 && (e.KeyChar < 48 || e.KeyChar > 57))
+            {
                 e.Handled = true;
+            }
         }
 
         private void buttonServiceCommit_Click(object sender, EventArgs e)
@@ -369,10 +456,9 @@ namespace SchoolAccounting.Forms
             {
                 using (var db = new ModelsContext())
                 {
-                    Client currentClient;
                     if (comboBoxClient.SelectedIndex != 0)
                     {
-                        currentClient = db.Clients.First(x => x.FullName == comboBoxClient.Text);
+                        var currentClient = db.Clients.First(x => x.FullName == comboBoxClient.Text);
                         currentClient.FullName = textBoxClientFullName.Text;
                         currentClient.TypeClient =
                             (TypeClient) Enum.Parse(typeof(TypeClient), comboBoxTypeClient.Text);
@@ -390,13 +476,23 @@ namespace SchoolAccounting.Forms
 
                     if (buttonAccountingCommit.Text.Contains("Создать"))
                     {
+                        var payment = new Payment
+                        {
+                            Comment = textBoxComment.Text,
+                            Paid = checkBoxPaid.Checked,
+                            //File = _fileData
+                        };
+                        db.Payments.Add(payment);
+                        db.SaveChanges();
+
                         db.Accountings.Add(new Accounting
                         {
                             Client = db.Clients.First(x => x.FullName == textBoxClientFullName.Text),
                             ClientId = db.Clients.First(x => x.FullName == textBoxClientFullName.Text).Id,
                             Date = dateTimePickerAccounting.Value,
                             Service = db.Services.First(x => x.Name == comboBoxService.Text),
-                            ServiceId = db.Services.First(x => x.Name == comboBoxService.Text).Id
+                            ServiceId = db.Services.First(x => x.Name == comboBoxService.Text).Id,
+                            PaymentId = payment.Id
                         });
                     }
                     else
@@ -412,6 +508,11 @@ namespace SchoolAccounting.Forms
                         editedAccounting.Client = db.Clients.First(x => x.FullName == textBoxClientFullName.Text);
                         editedAccounting.ClientId = db.Clients.First(x => x.FullName == textBoxClientFullName.Text).Id;
                         editedAccounting.Date = dateTimePickerAccounting.Value;
+
+                        var payment = db.Payments.First(x => x.Id == _accounting.PaymentId);
+                        payment.Comment = textBoxComment.Text;
+                        payment.Paid = checkBoxPaid.Checked;
+                        //payment.File = _fileData;
                     }
 
                     db.SaveChanges();
@@ -423,24 +524,260 @@ namespace SchoolAccounting.Forms
 
         private void comboBoxService_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (_typeOfTransaction != TypeOfTransaction.Редактирование)
+            using (var db = new ModelsContext())
+            {
+                labelWarningAccess.Text =
+                    "Доступно для: " + db.Services.First(x => x.Name == comboBoxService.Text).Access;
+            }
+        }
+
+        private void buttonLoadFile_Click(object sender, EventArgs e)
+        {
+            var ofd = new OpenFileDialog();
+
+            if (ofd.ShowDialog(this) == DialogResult.OK)
+            {
+                using (var file = File.OpenRead(ofd.FileName))
+                {
+                    using (var binaryReader = new BinaryReader(file))
+                    {
+                        _fileData = binaryReader.ReadBytes((int)file.Length);
+                    }
+                }
+
+                if (ofd.SafeFileName != null && (ofd.SafeFileName.Contains(".jpg") ||
+                                                 ofd.SafeFileName.Contains(".jpeg") ||
+                                                 ofd.SafeFileName.Contains(".png") ||
+                                                 ofd.SafeFileName.Contains(".bmp")))
+                {
+                    pictureBoxFile.Image = Image.FromFile(ofd.FileName);
+                }
+                else
+                {
+                    labelFileName.Text = ofd.SafeFileName;
+                }
+
+                _fileName = ofd.SafeFileName;
+            }
+        }
+
+        private void buttonUnloadFile_Click(object sender, EventArgs e)
+        {
+            _fileData = null;
+            pictureBoxFile.Image = null;
+            labelFileName.Text = null;
+        }
+
+        private void textBoxMadeBy_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 44 && !string.IsNullOrEmpty(textBoxMadeBy.Text) && !textBoxMadeBy.Text.Contains(','))
+            {
+                e.Handled = false;
+                return;
+            }
+
+            if (e.KeyChar != 8 && textBoxMadeBy.Text.Contains(',') && (textBoxMadeBy.Text.Length - 3 == textBoxMadeBy.Text.IndexOf(',')))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if (e.KeyChar != 8 && (e.KeyChar < 48 || e.KeyChar > 57))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private bool ValidateMadeBy()
+        {
+            if (string.IsNullOrEmpty(textBoxMadeBy.Text))
+            {
+                MessageBox.Show("Заполните внесенную оплату.");
+                return false;
+            }
+
+            if (textBoxMadeBy.Text.Contains(','))
+            {
+                for (var i = 0; i < 2; i++)
+                {
+                    if (textBoxMadeBy.Text.Length - 1 != textBoxMadeBy.Text.IndexOf(',') + 2)
+                    {
+                        textBoxMadeBy.Text += "0";
+                    }
+                }
+            }
+            else
+            {
+                textBoxMadeBy.Text += ",00";
+            }
+
+            return true;
+        }
+
+        private void buttonAddAttachment_Click(object sender, EventArgs e)
+        {
+            if (!ValidateMadeBy())
             {
                 return;
             }
 
-            var db = new ModelsContext();
+            var fileMsg = (_fileData != null ? string.Empty : "(файл не добавлен)");
+            if (MessageBox.Show(string.Join(string.Empty, "Действительно добавить", fileMsg, "?"),
+                    "Подтвердите действие", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            { 
+                using (var db = new ModelsContext())
+                {
+                    var attachment = new Attachment
+                    {
+                        MadeBy = double.Parse(textBoxMadeBy.Text),
+                        PaymentId = _accounting.PaymentId
+                    };
+
+                    if (_fileData != null)
+                    {
+                        attachment.FileName = _fileName;
+                        attachment.File = _fileData;
+                    }
+
+                    db.Attachments.Add(attachment);
+                    db.SaveChanges();
+
+                    LoadAttachments(_accounting);
+                }
+            }
+        }
+
+        private void dataGridViewAttachments_CellEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            var j = e.RowIndex;
+
             try
             {
-                labelWarningAccess.Text =
-                    "Доступно для: " + db.Services.First(x => x.Name == comboBoxService.Text).Access;
+                textBoxMadeBy.Text = dataGridViewAttachments[1, j].Value.ToString();
             }
             catch (Exception)
             {
                 // ignored
             }
-            finally
+        }
+
+        private void buttonOpenFile_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewAttachments.CurrentRow.Cells[0].Value == null)
             {
-                db.Dispose();
+                MessageBox.Show("Не выбрана запись.");
+                return;
+            }
+
+            var id = Convert.ToInt32(dataGridViewAttachments.CurrentRow.Cells[0].Value.ToString());
+            using (var db = new ModelsContext())
+            {
+                var attachment = db.Attachments.First(x => x.Id == id);
+                var tempName = Path.Combine(Path.GetTempPath() + attachment.FileName);
+                if (attachment.File != null)
+                {
+                    File.WriteAllBytes(tempName, attachment.File);
+                    Process.Start(tempName);
+                    return;
+                }
+
+                MessageBox.Show("Вложение не содержится.");
+            }
+            
+        }
+
+        private void dataGridViewAttachments_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                var j = e.RowIndex;
+
+                if (dataGridViewAttachments[3, j].Value.ToString() != "+")
+                {
+                    return;
+                }
+
+                var id = Convert.ToInt32(dataGridViewAttachments.CurrentRow.Cells[0].Value.ToString());
+                using (var db = new ModelsContext())
+                {
+                    var attachment = db.Attachments.First(x => x.Id == id);
+                    var tempName = Path.Combine(Path.GetTempPath() + attachment.FileName);
+                    if (attachment.File != null)
+                    {
+                        File.WriteAllBytes(tempName, attachment.File);
+                        Process.Start(tempName);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
+
+        private void buttonEditAttachment_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewAttachments.CurrentRow.Cells[0].Value == null)
+            {
+                MessageBox.Show("Не выбрана запись.");
+                return;
+            }
+
+            if (!ValidateMadeBy())
+            {
+                return;
+            }
+
+            var id = Convert.ToInt32(dataGridViewAttachments.CurrentRow.Cells[0].Value.ToString());
+            var fileMsg = (_fileData != null ? string.Empty : "(файл не добавлен)");
+            if (MessageBox.Show(string.Join(string.Empty, "Действительно редактировать", fileMsg, "?"),
+                    "Подтвердите действие", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                using (var db = new ModelsContext())
+                {
+                    var attachment = db.Attachments.First(x => x.Id == id);
+
+                    attachment.MadeBy = double.Parse(textBoxMadeBy.Text);
+
+                    if (attachment.FileName != null && MessageBox.Show("Удалить текущее вложение?",
+                            "Подтвердите действие", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    {
+                        attachment.FileName = null;
+                        attachment.File = null;
+                    }
+
+                    if (_fileData != null)
+                    {
+                        attachment.FileName = _fileName;
+                        attachment.File = _fileData;
+                    }
+
+                    db.SaveChanges();
+                    LoadAttachments(_accounting);
+                }
+            }
+                
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewAttachments.CurrentRow.Cells[0].Value == null)
+            {
+                MessageBox.Show("Не выбрана запись.");
+                return;
+            }
+
+            var id = Convert.ToInt32(dataGridViewAttachments.CurrentRow.Cells[0].Value.ToString());
+            if (MessageBox.Show("Действительно удалить?",
+                    "Подтвердите действие", MessageBoxButtons.OKCancel) == DialogResult.OK)
+            {
+                using (var db = new ModelsContext())
+                {
+                    var attachment = db.Attachments.First(x => x.Id == id);
+                    db.Attachments.Remove(attachment);
+                    db.SaveChanges();
+                    LoadAttachments(_accounting);
+                }
             }
         }
     }

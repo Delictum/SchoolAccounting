@@ -50,6 +50,8 @@
             this.textBoxClientFullName = new System.Windows.Forms.TextBox();
             this.labelClientFullName = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.textBoxServiceDescription = new System.Windows.Forms.TextBox();
+            this.labelServiceDescription = new System.Windows.Forms.Label();
             this.labelServiceType = new System.Windows.Forms.Label();
             this.comboBoxServiceType = new System.Windows.Forms.ComboBox();
             this.labelServiceAccess = new System.Windows.Forms.Label();
@@ -81,8 +83,6 @@
             this.helperToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutProgramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.textBoxServiceDescription = new System.Windows.Forms.TextBox();
-            this.labelServiceDescription = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAccounting)).BeginInit();
             this.tabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -98,7 +98,7 @@
             this.dataGridViewAccounting.Location = new System.Drawing.Point(6, 59);
             this.dataGridViewAccounting.Name = "dataGridViewAccounting";
             this.dataGridViewAccounting.ReadOnly = true;
-            this.dataGridViewAccounting.Size = new System.Drawing.Size(776, 330);
+            this.dataGridViewAccounting.Size = new System.Drawing.Size(833, 330);
             this.dataGridViewAccounting.TabIndex = 0;
             this.dataGridViewAccounting.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewAccounting_ColumnHeaderMouseClick);
             // 
@@ -110,7 +110,7 @@
             this.tabControl.Location = new System.Drawing.Point(0, 27);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(800, 423);
+            this.tabControl.Size = new System.Drawing.Size(855, 423);
             this.tabControl.TabIndex = 1;
             // 
             // tabPage1
@@ -136,7 +136,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(792, 397);
+            this.tabPage1.Size = new System.Drawing.Size(847, 397);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Учет услуг";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -155,7 +155,7 @@
             // 
             // buttonResetAccountingFilter
             // 
-            this.buttonResetAccountingFilter.Location = new System.Drawing.Point(706, 6);
+            this.buttonResetAccountingFilter.Location = new System.Drawing.Point(763, 5);
             this.buttonResetAccountingFilter.Name = "buttonResetAccountingFilter";
             this.buttonResetAccountingFilter.Size = new System.Drawing.Size(76, 21);
             this.buttonResetAccountingFilter.TabIndex = 16;
@@ -165,7 +165,7 @@
             // 
             // buttonApplyAccountingFilter
             // 
-            this.buttonApplyAccountingFilter.Location = new System.Drawing.Point(706, 32);
+            this.buttonApplyAccountingFilter.Location = new System.Drawing.Point(763, 32);
             this.buttonApplyAccountingFilter.Name = "buttonApplyAccountingFilter";
             this.buttonApplyAccountingFilter.Size = new System.Drawing.Size(76, 21);
             this.buttonApplyAccountingFilter.TabIndex = 15;
@@ -219,7 +219,7 @@
             this.comboBoxServiceName.FormattingEnabled = true;
             this.comboBoxServiceName.Location = new System.Drawing.Point(550, 6);
             this.comboBoxServiceName.Name = "comboBoxServiceName";
-            this.comboBoxServiceName.Size = new System.Drawing.Size(150, 21);
+            this.comboBoxServiceName.Size = new System.Drawing.Size(207, 21);
             this.comboBoxServiceName.TabIndex = 9;
             this.comboBoxServiceName.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.comboBoxTypeClient_KeyPress);
             // 
@@ -311,15 +311,31 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(792, 397);
+            this.tabPage2.Size = new System.Drawing.Size(847, 397);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Услуги";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // textBoxServiceDescription
+            // 
+            this.textBoxServiceDescription.Location = new System.Drawing.Point(326, 32);
+            this.textBoxServiceDescription.Name = "textBoxServiceDescription";
+            this.textBoxServiceDescription.Size = new System.Drawing.Size(431, 20);
+            this.textBoxServiceDescription.TabIndex = 63;
+            // 
+            // labelServiceDescription
+            // 
+            this.labelServiceDescription.AutoSize = true;
+            this.labelServiceDescription.Location = new System.Drawing.Point(260, 35);
+            this.labelServiceDescription.Name = "labelServiceDescription";
+            this.labelServiceDescription.Size = new System.Drawing.Size(57, 13);
+            this.labelServiceDescription.TabIndex = 62;
+            this.labelServiceDescription.Text = "Описание";
+            // 
             // labelServiceType
             // 
             this.labelServiceType.AutoSize = true;
-            this.labelServiceType.Location = new System.Drawing.Point(260, 10);
+            this.labelServiceType.Location = new System.Drawing.Point(291, 11);
             this.labelServiceType.Name = "labelServiceType";
             this.labelServiceType.Size = new System.Drawing.Size(26, 13);
             this.labelServiceType.TabIndex = 61;
@@ -328,16 +344,16 @@
             // comboBoxServiceType
             // 
             this.comboBoxServiceType.FormattingEnabled = true;
-            this.comboBoxServiceType.Location = new System.Drawing.Point(292, 7);
+            this.comboBoxServiceType.Location = new System.Drawing.Point(326, 7);
             this.comboBoxServiceType.Name = "comboBoxServiceType";
-            this.comboBoxServiceType.Size = new System.Drawing.Size(157, 21);
+            this.comboBoxServiceType.Size = new System.Drawing.Size(154, 21);
             this.comboBoxServiceType.TabIndex = 60;
             this.comboBoxServiceType.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.comboBoxTypeClient_KeyPress);
             // 
             // labelServiceAccess
             // 
             this.labelServiceAccess.AutoSize = true;
-            this.labelServiceAccess.Location = new System.Drawing.Point(455, 10);
+            this.labelServiceAccess.Location = new System.Drawing.Point(486, 11);
             this.labelServiceAccess.Name = "labelServiceAccess";
             this.labelServiceAccess.Size = new System.Drawing.Size(73, 13);
             this.labelServiceAccess.TabIndex = 59;
@@ -353,9 +369,9 @@
             "Среднешкольник",
             "Младшешкольник",
             "Дошкольник"});
-            this.comboBoxServiceAccess.Location = new System.Drawing.Point(534, 6);
+            this.comboBoxServiceAccess.Location = new System.Drawing.Point(565, 8);
             this.comboBoxServiceAccess.Name = "comboBoxServiceAccess";
-            this.comboBoxServiceAccess.Size = new System.Drawing.Size(169, 21);
+            this.comboBoxServiceAccess.Size = new System.Drawing.Size(192, 21);
             this.comboBoxServiceAccess.TabIndex = 58;
             this.comboBoxServiceAccess.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.comboBoxTypeClient_KeyPress);
             // 
@@ -363,7 +379,7 @@
             // 
             this.textBoxName.Location = new System.Drawing.Point(69, 7);
             this.textBoxName.Name = "textBoxName";
-            this.textBoxName.Size = new System.Drawing.Size(185, 20);
+            this.textBoxName.Size = new System.Drawing.Size(216, 20);
             this.textBoxName.TabIndex = 24;
             // 
             // labelName
@@ -377,7 +393,7 @@
             // 
             // buttonServiceFilterReset
             // 
-            this.buttonServiceFilterReset.Location = new System.Drawing.Point(709, 6);
+            this.buttonServiceFilterReset.Location = new System.Drawing.Point(763, 7);
             this.buttonServiceFilterReset.Name = "buttonServiceFilterReset";
             this.buttonServiceFilterReset.Size = new System.Drawing.Size(76, 21);
             this.buttonServiceFilterReset.TabIndex = 22;
@@ -387,7 +403,7 @@
             // 
             // buttonServiceFilterApply
             // 
-            this.buttonServiceFilterApply.Location = new System.Drawing.Point(709, 31);
+            this.buttonServiceFilterApply.Location = new System.Drawing.Point(763, 31);
             this.buttonServiceFilterApply.Name = "buttonServiceFilterApply";
             this.buttonServiceFilterApply.Size = new System.Drawing.Size(76, 21);
             this.buttonServiceFilterApply.TabIndex = 21;
@@ -435,7 +451,7 @@
             this.dataGridViewService.Location = new System.Drawing.Point(6, 58);
             this.dataGridViewService.Name = "dataGridViewService";
             this.dataGridViewService.ReadOnly = true;
-            this.dataGridViewService.Size = new System.Drawing.Size(780, 333);
+            this.dataGridViewService.Size = new System.Drawing.Size(833, 333);
             this.dataGridViewService.TabIndex = 1;
             // 
             // contextMenuStripDataGrid
@@ -477,7 +493,7 @@
             this.mainMenuStrip.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
-            this.mainMenuStrip.Size = new System.Drawing.Size(800, 24);
+            this.mainMenuStrip.Size = new System.Drawing.Size(855, 24);
             this.mainMenuStrip.TabIndex = 57;
             this.mainMenuStrip.Text = "menuStrip1";
             // 
@@ -578,27 +594,11 @@
             this.aboutProgramToolStripMenuItem.Text = "&О программе...";
             this.aboutProgramToolStripMenuItem.Click += new System.EventHandler(this.aboutProgramToolStripMenuItem_Click);
             // 
-            // textBoxServiceDescription
-            // 
-            this.textBoxServiceDescription.Location = new System.Drawing.Point(326, 32);
-            this.textBoxServiceDescription.Name = "textBoxServiceDescription";
-            this.textBoxServiceDescription.Size = new System.Drawing.Size(377, 20);
-            this.textBoxServiceDescription.TabIndex = 63;
-            // 
-            // labelServiceDescription
-            // 
-            this.labelServiceDescription.AutoSize = true;
-            this.labelServiceDescription.Location = new System.Drawing.Point(260, 35);
-            this.labelServiceDescription.Name = "labelServiceDescription";
-            this.labelServiceDescription.Size = new System.Drawing.Size(57, 13);
-            this.labelServiceDescription.TabIndex = 62;
-            this.labelServiceDescription.Text = "Описание";
-            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(855, 450);
             this.Controls.Add(this.mainMenuStrip);
             this.Controls.Add(this.tabControl);
             this.Name = "Main";
